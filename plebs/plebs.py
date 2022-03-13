@@ -1,0 +1,221 @@
+import numpy
+import os
+import pathlib
+import random
+import yaml
+
+from dice import roll
+from functools import reduce
+from itertools import chain
+from name_gen import name_gen
+from util import http_response
+
+
+OUT_DIR = os.path.dirname(__file__)
+CONTENT_DIR = os.path.join(OUT_DIR, "content/")
+LOCAL_DIR = "plebs/"
+STATS = [
+    "str",
+    "dex",
+    "con",
+    "int",
+    "wis",
+    "cha",
+]
+
+
+def gen_age(**kwargs):
+    youngest = kwargs.get("youngest", 16)
+    oldest = kwargs.get("oldest", 45)
+    return random.randint(youngest, oldest)
+
+
+def gen_gender(**kwargs):
+    set_gender = kwargs.get("gender", None)
+    if set_gender is not None:
+        return set_gender
+    genders_tuples = kwargs.get("genders", [("male", 0.5), ("female", 0.5)])
+    genders = [t[0] for t in genders_tuples]
+    probs = [t[1] for t in genders_tuples]
+
+    choice = numpy.random.choice(genders, p=probs)
+    return choice
+
+
+def gen_hp(**kwargs):
+    hit_die = kwargs.get("hit_die", (1, 6))
+    return reduce(lambda x, y: x + y, roll(*hit_die), 0)
+
+
+def gen_items(**kwargs):
+    items_file = kwargs.get("items", "items.txt")
+    path = os.path.join(CONTENT_DIR, items_file)
+    num_items = kwargs.get("num_items", None)
+
+    max_items = int(kwargs.get("max_items", 5))
+    if num_items is None:
+        num_items = numpy.random.randint(0, max_items)
+
+    with open(path, "r") as fh:
+        items = fh.read()
+    items = items.split("\n")
+
+    pleb_items = list(numpy.random.choice(items, size=num_items, replace=False))
+
+    if len(pleb_items) < 1:
+        return "none"
+    return pleb_items
+
+
+def gen_name(**kwargs):
+    name_gen_function = name_gen.name_gen_prob
+
+    gen = kwargs.get("name_generator", "prob")
+
+    if gen == "alt":
+        name_gen_function = name_gen.name_gen_alternator
+    elif gen == "norm":
+        name_gen_function = name_gen.name_gen_normcore
+    elif gen == "pairs":
+        name_gen_function = name_gen.name_gen_pairs
+    elif gen == "phoneme":
+        name_gen_function = name_gen.name_gen_phonemes
+    elif gen == "pet":
+        name_gen_function = name_gen.name_gen_petname
+
+    fn = {"first_last": "first"}
+    ln = {"first_last": "last"}
+
+    name = " ".join(
+        [
+            name_gen_function(**dict(chain(kwargs.items(), fn.items()))),
+            name_gen_function(**dict(chain(kwargs.items(), ln.items()))),
+        ]
+    )
+
+    return name
+
+
+def gen_personality(**kwargs):
+    personality_file = kwargs.get("personality", "personality.txt")
+    path = os.path.join(CONTENT_DIR, personality_file)
+    with open(path, "r") as fh:
+        pers = fh.read()
+    pers = pers.strip().split("\n")
+    num_pers = 3
+    choice = list(numpy.random.choice(pers, size=num_pers, replace=False))
+    return choice
+
+
+def gen_problems(**kwargs):
+    problems_file = kwargs.get("problems", "problems.txt")
+    path = os.path.join(CONTENT_DIR, problems_file)
+    with open(path, "r") as fh:
+        probs = fh.read()
+    probs = probs.split("\n")
+    num = len(probs) - 1
+    choice = numpy.random.randint(0, num)
+    return probs[choice]
+
+
+def return_race(**kwargs):
+    return kwargs["race"]
+
+
+def gen_profession(**kwargs):
+
+    professions_file = kwargs.get("professions", "professions.txt")
+    path = os.path.join(CONTENT_DIR, professions_file)
+    with open(path, "r") as fh:
+        profs = fh.read()
+    profs = profs.split("\n")
+    num = len(profs) - 1
+    choice = numpy.random.randint(0, num)
+    return profs[choice]
+
+
+def gen_stats(**kwargs):
+    stats = {}
+    for stat in STATS:
+        rolls = roll(4, 6)
+        rolls.remove(min(rolls))
+        stats[stat] = reduce(lambda x, y: x + y, rolls, -1)
+    return stats
+
+
+def pleb(race, **kwargs):
+    kwargs["race"] = race
+    p = {}
+    for f in FUNCTIONS.keys():
+        func = FUNCTIONS[f]
+        val = func(**kwargs)
+        kwargs[f] = val
+        p[f] = val
+    return p
+
+
+def stringify(d, pad=""):
+    if d is None:
+        return pad + ""
+    elif isinstance(d, str) or isinstance(d, int) or isinstance(d, float):
+        return pad + str(d)
+    elif isinstance(d, list):
+        return "\n".join([stringify(i, pad) for i in d])
+    elif isinstance(d, dict):
+        string = ""
+        for k, v in d.items():
+            enter = ""
+            k = stringify(k, pad)
+            v = stringify(v, pad + " ")
+            if "\n" in v:
+                enter = "\n"
+            string += f"{k}:{enter}{v}\n"
+        return string
+    else:
+        return pad
+
+
+FUNCTIONS = {
+    "age": gen_age,
+    "gender": gen_gender,
+    "hp": gen_hp,
+    "name": gen_name,
+    "race": return_race,
+    "stats": gen_stats,
+    "items": gen_items,
+    "profession": gen_profession,
+    "personality": gen_personality,
+    "problem": gen_problems,
+}
+
+
+def _plebs(number: int = 1, **kwargs):
+    config_yaml = os.path.join(OUT_DIR, "default-config.yaml")
+    with open(config_yaml, "r") as fh:
+        config = yaml.safe_load(fh)
+    if not os.path.exists(OUT_DIR):
+        pathlib.Path(OUT_DIR).mkdir(parents=True, exist_ok=True)
+
+    config["name_generator"] = "phoneme"
+
+    global ATTRIBUTES
+    ATTRIBUTES = config["attributes"]
+
+    races_and_probs = config.get("races", ["Human", 1.0])
+    races = [r[0] for r in races_and_probs]
+    probs = [r[1] for r in races_and_probs]
+
+    ps = []
+    for i in range(number):
+        race = numpy.random.choice(races, p=probs)
+        p = pleb(race, **config)
+        ps.append(p)
+
+    return ps
+
+
+def plebs_handler(event, context):
+    params = event["queryStringParameters"]
+    if params is None:
+        params = {}
+    return http_response(_plebs(int(params.get("number", "1"))))

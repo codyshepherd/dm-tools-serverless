@@ -1,58 +1,24 @@
+# dm-tools Serverless Deployment Setup
 
-# Welcome to your CDK Python project!
+## To Deploy:
 
-This is a blank project for Python development with CDK.
+* `cdk synth`
+* `cdk --profile <your profile> --region <your region> deploy`
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Description
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+This repo contains the CDK config and application code required for deploying `dm-tools` as a trio of AWS Lambda
+functions behind an API Gateway in AWS. 
 
-To manually create a virtualenv on MacOS and Linux:
+### Additional Configuration Required
 
-```
-$ python3 -m venv .venv
-```
+Additional once-per-deployment manual config will be necessary to correctly set up an alternate domain name to point
+at this deployment:
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
-```
-$ source .venv/bin/activate
-```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
-
-Enjoy!
+* purchase and register a domain name
+* in AWS Route 53, request a certificate
+  * add the DNS validation CNAME record under the domain in your domain registrar
+* In the API Gateway web console, create a "Custom Domain Name" with your (sub)domain of choice and map it to the API
+  Gateway stage of your choice (`prod` by default).
+* create a CNAME record for your (sub)domain of choice mapping the (sub)domain to the API Gateway endpoint
+* create one or more API Keys to allow services to call this API and protect yourself from overages by malicious actors

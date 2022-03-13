@@ -1,0 +1,111 @@
+Alchemist
+Armorer
+Baker
+Barber
+Barhand
+Blacksmith
+Brewer
+Bricklayer
+Burglar
+Busker
+Butcher
+Caravaner
+Carpenter
+Cartwright
+Chirugeon
+Clerk
+Cobbler
+Cook
+Cooper
+Councilperson
+Courier
+Deacon
+Distiller
+Driver
+Engineer
+Falconer
+Farmer
+Ferrier
+Fireman
+Fisherman
+Fishmonger
+Fletcher
+Furrier
+Gatekeeper
+Glazer
+Goatherd
+Grocer
+Groomsman
+Guard
+Guide
+Healer
+Horse stall mucker
+Houndmaster
+Hunter
+Illuminator
+Innkeeper
+Janitor
+Jeweler
+Lamplighter
+Landlord
+Lantern maker
+Leatherworker
+Locksmith
+Lumberjack
+Mason
+Merchant
+Miller
+Milliner
+Miner
+Minstrel
+Mower
+Nurse
+Oracle
+Paige
+Performer
+Pickler
+Pig farmer
+Plowman
+Porter
+Potter
+Printer
+Public bath house attendant
+Rancher
+Roofer
+Rope maker
+Saddler
+Sailor
+Schoolteacher
+Scribe
+Servant
+Shepherd
+Shipwright
+Soldier
+Stablehand
+Stonecarver
+Stonemason
+Swinherd
+Tailor
+Tanner
+Tax collector
+Thief
+Tiller
+Tinker
+Town crier
+Toymaker
+Tracker
+Trapper
+Trash collector
+Undertaker
+Unemployed
+Vendor
+Village idiot
+Vinegar maker
+Vintner
+Waiter
+Washer
+Watchman
+Weaver
+Well digger
+Wheelwright
+Woodworker

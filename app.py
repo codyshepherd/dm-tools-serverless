@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 
-import aws_cdk as cdk
+import aws_cdk.core as cdk
 
 from dm_tools_serverless.dm_tools_serverless_stack import DmToolsServerlessStack
 

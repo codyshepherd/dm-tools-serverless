@@ -69,7 +69,17 @@ class DmToolsServerlessStack(core.Stack):
             runtime=lambda_.Runtime.PYTHON_3_9,
         )
 
-        api = apigateway.RestApi(self, "dm-tools-api")
+        api = apigateway.RestApi(
+            self,
+            "dm-tools-api",
+            default_cors_preflight_options=apigateway.CorsOptions(
+                allow_methods=["GET"],
+                allow_origins=[
+                    " https://dm-tools.fission.app/",
+                    "http://localhost:3000",
+                ],
+            ),
+        )
 
         pockets_endpoint = api.root.add_resource("pockets")
         pockets_endpoint.add_method(

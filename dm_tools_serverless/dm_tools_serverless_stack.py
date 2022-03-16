@@ -73,11 +73,9 @@ class DmToolsServerlessStack(core.Stack):
             self,
             "dm-tools-api",
             default_cors_preflight_options=apigateway.CorsOptions(
-                allow_methods=["GET"],
-                allow_origins=[
-                    " https://dm-tools.fission.app/",
-                    "http://localhost:3000",
-                ],
+                allow_credentials=True,
+                allow_methods=["GET", "OPTIONS"],
+                allow_origins=apigateway.Cors.ALL_ORIGINS,
             ),
         )
 
